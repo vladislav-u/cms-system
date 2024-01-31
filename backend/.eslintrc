@@ -9,6 +9,13 @@
         "endOfLine": "auto",
         "tabWidth": 4
       }
-    ]
+    ],
+    "import/no-extraneous-dependencies": [
+      "error", 
+      {
+        "devDependencies": true,
+        "dependencies": true
+      }
+      ]
   }
 }
