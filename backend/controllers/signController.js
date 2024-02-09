@@ -1,28 +1,32 @@
 import bcrypt from 'bcrypt';
+import cookie from 'cookie';
 import { User } from '../models/userModel.js';
+import { generateToken } from '../services/authService.js';
 
 export const signIn = async (req, res) => {
     try {
         const { email, password } = req.body;
 
         const user = await User.findOne({ email });
-        if (!user) {
-            return res
-                .status(401)
-                .json({ error: 'Invalid username or password' });
-        }
 
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            return res
-                .status(401)
-                .json({ error: 'Invalid username or password' });
-        }
+        if (user && (await bcrypt.compareSync(password, user.password))) {
+            user.token = generateToken(user._id);
+            res.cookie('token', user.token, {
+                httpOnly: true,
+                maxAge: 24 * 60 * 60 * 1000,
+            });
 
-        res.status(200).json({ message: 'Login successful' });
+            res.status(200).json({
+                message: 'Signed in successfully.',
+            });
+        } else {
+            res.status(400).json({
+                error: 'Email or password is incorrect.',
+            });
+        }
     } catch (error) {
         console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error.' });
     }
 };
 
@@ -37,13 +41,13 @@ export const signUp = async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({
+        const newUser = {
             name,
             email,
             password: hashedPassword,
-        });
+        };
 
-        await newUser.save();
+        const user = await User.create(newUser);
         res.status(201).json({ message: 'User registered successfully' });
     } catch (error) {
         console.error(error);

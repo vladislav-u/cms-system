@@ -1,3 +1,4 @@
+import axios from "axios";
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignIn.css';
@@ -16,7 +17,24 @@ const SignIn = () => {
     const [password, setPassword] = useState('');
 
     const handleSignIn = async () => {
-        // logic
+        const data = {
+            email: email,
+            password: password
+        };
+
+		axios
+			.post('http://localhost:8080/login', data, {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+			})
+			.then((response) => {
+				console.log(response.data);
+				navigate('/');
+			})
+			.catch((error) => {
+				console.log(error);
+			});
     };
 
     return (

@@ -28,7 +28,6 @@ const SigninSignup = () => {
 		axios
 			.post('http://localhost:8080/register', data, {
 				headers: {
-                    'Access-Control-Allow-Origin': '*',
 					'Content-Type': 'application/json',
 				},
 			})
