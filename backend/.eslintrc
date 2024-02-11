@@ -12,10 +12,11 @@
     ],
     "import/no-extraneous-dependencies": [
       "error", 
-      {
-        "devDependencies": true,
-        "dependencies": true
-      }
-      ]
+      { "devDependencies": true }
+      ],
+    "import/extensions": [
+      "warn",
+      { "js": "always" }
+    ]
   }
 }

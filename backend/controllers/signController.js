@@ -1,7 +1,6 @@
 import bcrypt from 'bcrypt';
-import cookie from 'cookie';
-import { User } from '../models/userModel.js';
-import { generateToken } from '../services/authService.js';
+import User from '../models/userModel.js';
+import generateToken from '../services/authService.js';
 
 export const signIn = async (req, res) => {
     try {
@@ -10,7 +9,7 @@ export const signIn = async (req, res) => {
         const user = await User.findOne({ email });
 
         if (user && (await bcrypt.compareSync(password, user.password))) {
-            user.token = generateToken(user._id);
+            user.token = generateToken(user.id);
             res.cookie('token', user.token, {
                 httpOnly: true,
                 maxAge: 24 * 60 * 60 * 1000,
@@ -25,7 +24,6 @@ export const signIn = async (req, res) => {
             });
         }
     } catch (error) {
-        console.error(error);
         res.status(500).json({ error: 'Internal server error.' });
     }
 };
@@ -47,10 +45,11 @@ export const signUp = async (req, res) => {
             password: hashedPassword,
         };
 
-        const user = await User.create(newUser);
-        res.status(201).json({ message: 'User registered successfully' });
+        await User.create(newUser);
+        return res
+            .status(201)
+            .json({ message: 'User registered successfully' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: 'Internal server error' });
+        return res.status(500).json({ error: 'Internal server error' });
     }
 };

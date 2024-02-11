@@ -3,8 +3,8 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import express from 'express';
-import mongoose from 'mongoose';
 import userRoute from './routes/userRoute.js';
+import connectToDatabase from './services/dbService.js';
 
 dotenv.config();
 const app = express();
@@ -19,13 +19,8 @@ app.use(
     }),
 );
 // Database Connection
-try {
-    await mongoose.connect(process.env.MONGODB_URI);
-    console.log('Connected to MongoDB');
-} catch (e) {
-    console.log('Connection to MongoDB failed', e);
-}
-const db = mongoose.connection;
+connectToDatabase();
+
 app.use(express.json());
 
 app.use('/', userRoute);
