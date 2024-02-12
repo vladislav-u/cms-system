@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import * as dotenv from 'dotenv';
 import express from 'express';
+import verifyToken from './middlewares/authMiddleware.js';
 import userRoute from './routes/userRoute.js';
 import connectToDatabase from './services/dbService.js';
 
@@ -24,6 +25,12 @@ connectToDatabase();
 app.use(express.json());
 
 app.use('/', userRoute);
+app.get('/api/verify-token', verifyToken, (req, res) => {
+    res.status(200).json({
+        message: 'Token verified successfully.',
+        user: req.user,
+    });
+});
 
 app.listen(process.env.PORT, () => {
     console.log(`Server is running at http://localhost:${process.env.PORT}`);

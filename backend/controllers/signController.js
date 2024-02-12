@@ -11,7 +11,7 @@ export const signIn = async (req, res) => {
         if (user && (await bcrypt.compareSync(password, user.password))) {
             user.token = generateToken(user.id);
             res.cookie('token', user.token, {
-                httpOnly: true,
+                httpOnly: false,
                 maxAge: 24 * 60 * 60 * 1000,
             });
 
