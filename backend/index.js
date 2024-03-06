@@ -4,6 +4,7 @@ import cors from 'cors';
 import * as dotenv from 'dotenv';
 import express from 'express';
 import verifyToken from './middlewares/authMiddleware.js';
+import botApiRoute from './routes/botApiRoute.js';
 import userRoute from './routes/userRoute.js';
 import connectToDatabase from './services/dbService.js';
 
@@ -25,6 +26,7 @@ connectToDatabase();
 app.use(express.json());
 
 app.use('/', userRoute);
+app.use('/', botApiRoute);
 app.get('/api/verify-token', verifyToken, (req, res) => {
     res.status(200).json({
         message: 'Token verified successfully.',
