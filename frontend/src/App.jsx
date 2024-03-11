@@ -9,18 +9,16 @@ import SignUp from './components/signUp/SignUp';
 import { DARK_THEME, LIGHT_THEME } from './constants/themeConstants';
 import { ThemeContext } from './context/ThemeContext';
 import BaseLayout from './layout/BaseLayout';
-import { Dashboard, PageNotFound } from "./screens";
+import { Dashboard, PageNotFound } from './screens';
 
 function App() {
-
-	const {theme, toggleTheme} = useContext(ThemeContext);
-	console.log(theme);
+	const { theme, toggleTheme } = useContext(ThemeContext);
 
 	useEffect(() => {
-		if(theme === DARK_THEME) {
-			document.body.classList.add("dark-mode");
+		if (theme === DARK_THEME) {
+			document.body.classList.add('dark-mode');
 		} else {
-			document.body.classList.remove("dark-mode");
+			document.body.classList.remove('dark-mode');
 		}
 	}, [theme]);
 
@@ -29,7 +27,7 @@ function App() {
 			<Router>
 				<Routes>
 					<Route element={<BaseLayout />}>
-						<Route exact path="/test" element={<Dashboard />}/>
+						<Route exact path="/dashboard" element={<Dashboard />} />
 						<Route exact path="*" element={<PageNotFound />} />
 					</Route>
 					<Route exact path="/" element={<MainPage />} />
@@ -37,8 +35,16 @@ function App() {
 					<Route exact path="/login" element={<SignIn />} />
 				</Routes>
 
-				<button type="button" className="theme-toggle-btn" onClick={toggleTheme}>
-					<img className="theme-icon" src={theme === LIGHT_THEME ? SunIcon : MoonIcon} alt="Theme Toggle"/>
+				<button
+					type="button"
+					className="theme-toggle-btn"
+					onClick={toggleTheme}
+				>
+					<img
+						className="theme-icon"
+						src={theme === LIGHT_THEME ? SunIcon : MoonIcon}
+						alt="Theme Toggle"
+					/>
 				</button>
 			</Router>
 		</>

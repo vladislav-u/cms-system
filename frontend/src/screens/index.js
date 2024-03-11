@@ -1,2 +1,3 @@
-export { default as Dashboard } from './dashboard/DashboardScreen.jsx';
-export { default as PageNotFound } from './error/PageNotFound.jsx';
+export { default as AreaTop } from '../components/dashboard/areaTop/AreaTop';
+export { default as Dashboard } from './dashboard/DashboardScreen';
+export { default as PageNotFound } from './error/PageNotFound';

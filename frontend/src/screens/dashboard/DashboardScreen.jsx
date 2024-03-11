@@ -1,9 +1,11 @@
+import { AreaCards, AreaTop } from '../../components';
 const Dashboard = () => {
-    return (
-        <div>
+	return (
+		<div className="content-area">
+			<AreaTop />
+			<AreaCards />
+		</div>
+	);
+};
 
-        </div>
-    )
-}
-
-export default Dashboard
+export default Dashboard;
