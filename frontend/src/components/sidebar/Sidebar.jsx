@@ -8,7 +8,7 @@ import {
 	MdOutlinePeople,
 	MdOutlineSettings,
 } from 'react-icons/md';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LIGHT_THEME } from '../../constants/themeConstants';
 import { SidebarContext } from '../../context/SidebarContext';
 import { ThemeContext } from '../../context/ThemeContext';
@@ -21,6 +21,7 @@ const Sidebar = () => {
 	const { isSidebarOpen, closeSidebar } = useContext(SidebarContext);
 	const navbarRef = useRef(null);
 	const navigate = useNavigate();
+	const location = useLocation();
 
 	// closing navbar when clicked outside the sidebar area
 	const handleClickOutside = (event) => {
@@ -75,7 +76,12 @@ const Sidebar = () => {
 				<div className="sidebar-menu">
 					<ul className="menu-list">
 						<li className="menu-item">
-							<Link to="/dashboard" className="menu-link active">
+							<Link
+								to="/dashboard"
+								className={`menu-link ${
+									location.pathname === '/dashboard' ? 'active' : ''
+								}`}
+							>
 								<span className="menu-link-icon">
 									<MdOutlineGridView size={20} />
 								</span>
@@ -83,7 +89,12 @@ const Sidebar = () => {
 							</Link>
 						</li>
 						<li className="menu-item">
-							<Link to="/manage-bots" className="menu-link">
+							<Link
+								to="/manage-bots"
+								className={`menu-link ${
+									location.pathname === '/manage-bots' ? 'active' : ''
+								}`}
+							>
 								<span className="menu-link-icon">
 									<MdOutlinePeople size={20} />
 								</span>
@@ -91,7 +102,12 @@ const Sidebar = () => {
 							</Link>
 						</li>
 						<li className="menu-item">
-							<Link to="/notifications" className="menu-link">
+							<Link
+								to="/notifications"
+								className={`menu-link ${
+									location.pathname === '/notifications' ? 'active' : ''
+								}`}
+							>
 								<span className="menu-link-icon">
 									<MdOutlineMessage size={20} />
 								</span>

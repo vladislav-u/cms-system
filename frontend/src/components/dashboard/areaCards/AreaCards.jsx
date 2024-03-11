@@ -1,27 +1,43 @@
-import AreaCard from './AreaCard';
+import axios from 'axios';
+import React from 'react';
 import './AreaCards.scss';
 
 const AreaCards = () => {
+	const handleSubmit = async (e) => {
+		try {
+			axios
+				.post('http://localhost:8080/api/submitToken', {
+					headers: {
+						'Content-Type': 'application/json',
+					},
+				})
+				.then((response) => {
+					console.log(response.data);
+				})
+				.catch((error) => {
+					console.log(error);
+				});
+		} catch (error) {
+			console.error('Token submitting error:', error);
+		}
+	};
+
 	return (
 		<section className="content-area-cards">
-			<AreaCard
-				colors={['#e4e8ef', '#475be8']}
-				percentFillValue={80}
-				cardInfo={{
-					title: 'Add Bot Token',
-					value: 'Empty',
-					text: 'Test Text',
-				}}
-			/>
-			<AreaCard
-				colors={['#e4e8ef', '#4ce13f']}
-				percentFillValue={50}
-				cardInfo={{
-					title: 'Connected Bots',
-					value: 'Empty',
-					text: 'Test Text 2',
-				}}
-			/>
+			<div className="card">
+				<form className="form-field" onSubmit={handleSubmit}>
+					<h2>Add Bot:</h2>
+					<input
+						className="input-field"
+						type="text"
+						placeholder="Enter Bot Token"
+					/>
+					<button className="btn-submit" type="submit">
+						Submit Token
+					</button>
+				</form>
+			</div>
+			<div className="card">card div</div>
 		</section>
 	);
 };
