@@ -1,12 +1,17 @@
 import axios from 'axios';
-import React from 'react';
+import React, { useState } from 'react';
 import './AreaCards.scss';
 
 const AreaCards = () => {
+	const [token, setToken] = useState('');
+
 	const handleSubmit = async (e) => {
+		const data = {
+			token: token,
+		};
 		try {
 			axios
-				.post('http://localhost:8080/api/submitToken', {
+				.post('http://localhost:8080/api/submitToken', data, {
 					headers: {
 						'Content-Type': 'application/json',
 					},
@@ -31,6 +36,7 @@ const AreaCards = () => {
 						className="input-field"
 						type="text"
 						placeholder="Enter Bot Token"
+						onChange={(e) => setToken(e.target.value)}
 					/>
 					<button className="btn-submit" type="submit">
 						Submit Token

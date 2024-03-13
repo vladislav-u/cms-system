@@ -26,7 +26,7 @@ connectToDatabase();
 app.use(express.json());
 
 app.use('/', userRoute);
-app.use('/', botApiRoute);
+app.use('/api', botApiRoute);
 app.get('/api/verify-token', verifyToken, (req, res) => {
     res.status(200).json({
         message: 'Token verified successfully.',
