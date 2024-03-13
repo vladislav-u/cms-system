@@ -5,7 +5,9 @@ import './AreaCards.scss';
 const AreaCards = () => {
 	const [botToken, setBotToken] = useState('');
 
-	const handleSubmit = async (e) => {
+	const handleSubmit = (e) => {
+		e.preventDefault();
+
 		const data = {
 			botToken: botToken,
 		};
@@ -20,12 +22,12 @@ const AreaCards = () => {
 				console.log(response.data);
 			})
 			.catch((error) => {
-				console.error(error);
+				console.log(error);
 			});
 	};
 
 	const handleInputChange = (e) => {
-		setBotToken(e.target.value); // Update the token state with the input field value
+		setBotToken(e.target.value);
 	};
 
 	return (
@@ -37,8 +39,8 @@ const AreaCards = () => {
 						className="input-field"
 						type="text"
 						placeholder="Enter Bot Token"
-						value={botToken} // Bind the input field value to the token state
-						onChange={handleInputChange} // Handle input changes
+						value={botToken}
+						onChange={handleInputChange}
 					/>
 					<button className="btn-submit" type="submit">
 						Submit Token
