@@ -4,9 +4,9 @@ import connectToBot from '../services/botService.js';
 
 export const submitToken = async (req, res) => {
     try {
-        const { token } = req.body;
+        const { botToken } = req.body;
 
-        const botExists = await Bot.findOne({ botToken: token });
+        const botExists = await Bot.findOne({ botToken });
         if (botExists) {
             return res.status(400).json({ error: 'Bot already exists' });
         }
@@ -17,7 +17,7 @@ export const submitToken = async (req, res) => {
 
         const newBot = {
             ownerId: userId,
-            botToken: token,
+            botToken,
         };
 
         await Bot.create(newBot);

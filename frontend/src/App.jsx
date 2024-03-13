@@ -9,7 +9,7 @@ import SignUp from './components/signUp/SignUp';
 import { DARK_THEME, LIGHT_THEME } from './constants/themeConstants';
 import { ThemeContext } from './context/ThemeContext';
 import BaseLayout from './layout/BaseLayout';
-import { Dashboard, PageNotFound } from './screens';
+import { Dashboard, ManageBots, PageNotFound } from './screens';
 
 function App() {
 	const { theme, toggleTheme } = useContext(ThemeContext);
@@ -28,6 +28,7 @@ function App() {
 				<Routes>
 					<Route element={<BaseLayout />}>
 						<Route exact path="/dashboard" element={<Dashboard />} />
+						<Route exact path="/manage-bots" element={<ManageBots />} />
 						<Route exact path="*" element={<PageNotFound />} />
 					</Route>
 					<Route exact path="/" element={<MainPage />} />
