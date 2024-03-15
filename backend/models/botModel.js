@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 
 const botSchema = new mongoose.Schema({
+    botName: {
+        type: String,
+        required: true,
+    },
     ownerId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',

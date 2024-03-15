@@ -1,15 +1,32 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './AreaCards.scss';
 
 const AreaCards = () => {
 	const [botToken, setBotToken] = useState('');
+	const [botName, setBotName] = useState('');
+	const [dataList, setDataList] = useState([]);
+
+	useEffect(() => {
+		fetchDataList();
+	}, []);
+
+	const fetchDataList = async () => {
+		try {
+			const response = await axios.get('http://localhost:8080/api/getBots');
+			console.log(response.data);
+			setDataList(response.data);
+		} catch (error) {
+			console.log('Error fetching data:', error);
+		}
+	};
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 
 		const data = {
 			botToken: botToken,
+			botName: botName,
 		};
 
 		axios
@@ -20,14 +37,34 @@ const AreaCards = () => {
 			})
 			.then((response) => {
 				console.log(response.data);
+
+				fetchDataList();
+				setBotToken('');
+				setBotName('');
 			})
 			.catch((error) => {
 				console.log(error);
 			});
 	};
 
-	const handleInputChange = (e) => {
+	const handleDelete = async (_id) => {
+		try {
+			const response = await axios.delete(
+				`http://localhost:8080/api/deleteBot/${_id}`
+			);
+			console.log(response.data);
+			fetchDataList();
+		} catch (error) {
+			console.log('Error deleting bot:', error);
+		}
+	};
+
+	const handleTokenChange = (e) => {
 		setBotToken(e.target.value);
+	};
+
+	const handleNameChange = (e) => {
+		setBotName(e.target.value);
 	};
 
 	return (
@@ -38,16 +75,39 @@ const AreaCards = () => {
 					<input
 						className="input-field"
 						type="text"
+						placeholder="Enter Bot Name"
+						value={botName}
+						onChange={handleNameChange}
+					/>
+					<input
+						className="input-field"
+						type="text"
 						placeholder="Enter Bot Token"
 						value={botToken}
-						onChange={handleInputChange}
+						onChange={handleTokenChange}
 					/>
 					<button className="btn-submit" type="submit">
 						Submit Token
 					</button>
 				</form>
 			</div>
-			<div className="card">card div</div>
+
+			<div className="card">
+				{dataList.map((item, index) => (
+					<div key={index} className={`bot-card ${index}`}>
+						<h2>{item.botName}</h2>
+						<div className="btn-wrap">
+							<button className="btn-submit">Select Bot</button>
+							<button
+								className="btn-delete"
+								onClick={() => handleDelete(item._id)}
+							>
+								Delete Bot
+							</button>
+						</div>
+					</div>
+				))}
+			</div>
 		</section>
 	);
 };

@@ -4,7 +4,7 @@ import connectToBot from '../services/botService.js';
 
 export const submitToken = async (req, res) => {
     try {
-        const { botToken } = req.body;
+        const { botToken, botName } = req.body;
 
         const botExists = await Bot.findOne({ botToken });
         if (botExists) {
@@ -16,12 +16,37 @@ export const submitToken = async (req, res) => {
         const userId = decodedToken.user_id;
 
         const newBot = {
+            botName,
             ownerId: userId,
             botToken,
         };
 
         await Bot.create(newBot);
         return res.status(201).json({ message: 'Bot added successfully.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+export const getBots = async (req, res) => {
+    try {
+        const allBots = await Bot.find();
+
+        return res.status(200).json(allBots);
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+export const deleteBot = async (req, res) => {
+    try {
+        const botId = req.params.id;
+
+        await Bot.findByIdAndDelete(botId);
+
+        const allBots = await Bot.find();
+
+        return res.status(200).json(allBots);
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
