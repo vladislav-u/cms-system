@@ -42,8 +42,12 @@ export const deleteBot = async (req, res) => {
     try {
         const botId = req.params.id;
 
-        await Bot.findByIdAndDelete(botId);
+        const botIdFromCookies = req.cookies.botId;
+        if (botId === botIdFromCookies) {
+            res.clearCookie('botId');
+        }
 
+        await Bot.findByIdAndDelete(botId);
         const allBots = await Bot.find();
 
         return res.status(200).json(allBots);
