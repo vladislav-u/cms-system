@@ -52,6 +52,21 @@ export const deleteBot = async (req, res) => {
     }
 };
 
+export const saveToCookies = async (req, res) => {
+    try {
+        const { botId } = req.body;
+
+        res.cookie('botId', botId, {
+            httpOnly: false,
+            maxAge: 24 * 60 * 60 * 1000,
+        });
+
+        return res.status(200).json({ message: 'Bot Id saved successfully.' });
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
 let bot;
 
 export const connect = async (req, res) => {

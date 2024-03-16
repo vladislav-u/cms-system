@@ -14,7 +14,6 @@ const AreaCards = () => {
 	const fetchDataList = async () => {
 		try {
 			const response = await axios.get('http://localhost:8080/api/getBots');
-			console.log(response.data);
 			setDataList(response.data);
 		} catch (error) {
 			console.log('Error fetching data:', error);
@@ -47,7 +46,18 @@ const AreaCards = () => {
 			});
 	};
 
-	const handleDelete = async (_id) => {
+	const handleSelectBot = async (_id) => {
+		axios
+			.post('http://localhost:8080/api/saveToCookies', { botId: _id })
+			.then((response) => {
+				console.log(response.data);
+			})
+			.catch((error) => {
+				console.log(error);
+			});
+	};
+
+	const handleDeleteBot = async (_id) => {
 		try {
 			const response = await axios.delete(
 				`http://localhost:8080/api/deleteBot/${_id}`
@@ -97,10 +107,15 @@ const AreaCards = () => {
 					<div key={index} className={`bot-card ${index}`}>
 						<h2>{item.botName}</h2>
 						<div className="btn-wrap">
-							<button className="btn-submit">Select Bot</button>
+							<button
+								className="btn-submit"
+								onClick={() => handleSelectBot(item._id)}
+							>
+								Select Bot
+							</button>
 							<button
 								className="btn-delete"
-								onClick={() => handleDelete(item._id)}
+								onClick={() => handleDeleteBot(item._id)}
 							>
 								Delete Bot
 							</button>
