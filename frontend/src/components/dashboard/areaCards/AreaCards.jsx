@@ -33,12 +33,22 @@ const AreaCards = () => {
 
 	const launchBot = async () => {
 		axios
-			.post('http://localhost:8080/api/launchBot', { botToken })
+			.post('http://localhost:8080/api/command/launchBot', { botToken })
 			.then((response) => {
 				console.log(response.data);
 			})
 			.catch((error) => {
 				console.error('Error launching bot:', error);
+			});
+	};
+	const stopBot = async () => {
+		axios
+			.post('http://localhost:8080/api/command/stopBot')
+			.then((response) => {
+				console.log(response.data);
+			})
+			.catch((error) => {
+				console.error('Error stopping bot:', error);
 			});
 	};
 
@@ -48,9 +58,14 @@ const AreaCards = () => {
 				{botName && (
 					<div className="bot-card">
 						<h2>Launch this bot: {botName}</h2>
-						<button className="btn-submit" onClick={launchBot}>
-							Launch Bot
-						</button>
+						<div className="btn-wrap">
+							<button className="btn-submit" onClick={launchBot}>
+								Launch Bot
+							</button>
+							<button className="btn-delete" onClick={stopBot}>
+								Stop Bot
+							</button>
+						</div>
 					</div>
 				)}
 			</div>

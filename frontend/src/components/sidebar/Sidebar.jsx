@@ -43,6 +43,7 @@ const Sidebar = () => {
 
 	const handleLogOut = async () => {
 		document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+		document.cookie = 'botId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
 		axios
 			.post('http://localhost:8080/logout', {
 				headers: {
