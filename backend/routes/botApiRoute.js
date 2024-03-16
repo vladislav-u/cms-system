@@ -2,6 +2,7 @@ import express from 'express';
 import {
     connect,
     deleteBot,
+    getBotData,
     getBots,
     saveToCookies,
     submitToken,
@@ -14,6 +15,7 @@ botApiRoute.get('/connect', connect);
 botApiRoute.get('/test', testMethod);
 botApiRoute.get('/getBots', getBots);
 botApiRoute.post('/submitToken', submitToken);
+botApiRoute.get('/getBotData/:id', getBotData);
 botApiRoute.post('/saveToCookies', saveToCookies);
 botApiRoute.delete('/deleteBot/:id', deleteBot);
 

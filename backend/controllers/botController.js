@@ -71,6 +71,20 @@ export const saveToCookies = async (req, res) => {
     }
 };
 
+export const getBotData = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const bot = await Bot.findById(id);
+        if (!bot) {
+            return res.status(404).json({ error: 'Bot not found' });
+        }
+
+        return res.status(200).json(bot);
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
 let bot;
 
 export const connect = async (req, res) => {
