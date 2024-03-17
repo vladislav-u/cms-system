@@ -23,6 +23,14 @@ export const submitToken = async (req, res) => {
         };
 
         await Bot.create(newBot);
+
+        // Make commandStatus Model for this bot
+        const bot = await Bot.findOne({ botToken });
+        const newCommandStatus = {
+            botId: bot._id,
+        };
+        await commandStatus.create(newCommandStatus);
+
         return res.status(201).json({ message: 'Bot added successfully.' });
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' });

@@ -8,11 +8,11 @@ const AreaCards = () => {
 	const [botToken, setBotToken] = useState('');
 	const [isFilterEnabled, setIsFilterEnabled] = useState();
 
-	const toggleFilter = () => {
+	const toggleFilter = async () => {
 		setIsFilterEnabled(!isFilterEnabled);
 		axios
 			.post('http://localhost:8080/api/command/messageFilter', {
-				isFilterEnabled,
+				isFilterEnabled: !isFilterEnabled,
 			})
 			.then((response) => {
 				console.log(response.data);

@@ -10,13 +10,6 @@ export const launchBot = async (req, res) => {
             bot.stop();
         }
 
-        // Make commandStatus Model for this bot
-        const { botId } = req.cookies;
-        const newCommandStatus = {
-            botId,
-        };
-        await commandStatus.create(newCommandStatus);
-
         // Launch bot
         const { botToken } = req.body;
         bot = new Telegraf(botToken);
@@ -48,6 +41,13 @@ const prohibitedPattern = new RegExp(prohibitedWords.join('|'), 'i');
 export const messageFilter = async (req, res) => {
     try {
         const { isFilterEnabled } = req.body;
+        const { botId } = req.cookies;
+
+        // Update State of a command in database
+        await commandStatus.findOneAndUpdate(
+            { botId },
+            { isMessageFilterEnabled: isFilterEnabled },
+        );
 
         bot.use((ctx, next) => {
             if (
