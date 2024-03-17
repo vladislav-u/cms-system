@@ -1,6 +1,8 @@
 import jwt from 'jsonwebtoken';
 import Bot from '../models/botModel.js';
+import commandStatus from '../models/commandStatusModel.js';
 
+// Submit a bot token and write a new bot to database
 export const submitToken = async (req, res) => {
     try {
         const { botToken, botName } = req.body;
@@ -27,6 +29,7 @@ export const submitToken = async (req, res) => {
     }
 };
 
+// Get all bots from database
 export const getBots = async (req, res) => {
     try {
         const allBots = await Bot.find();
@@ -37,6 +40,7 @@ export const getBots = async (req, res) => {
     }
 };
 
+// Delete bot and info about its commands from database
 export const deleteBot = async (req, res) => {
     try {
         const botId = req.params.id;
@@ -47,6 +51,7 @@ export const deleteBot = async (req, res) => {
         }
 
         await Bot.findByIdAndDelete(botId);
+        await commandStatus.deleteMany({ botId });
         const allBots = await Bot.find();
 
         return res.status(200).json(allBots);
@@ -55,6 +60,7 @@ export const deleteBot = async (req, res) => {
     }
 };
 
+// Save bot ID to cookies
 export const saveToCookies = async (req, res) => {
     try {
         const { botId } = req.body;
@@ -70,6 +76,7 @@ export const saveToCookies = async (req, res) => {
     }
 };
 
+// Get info about selected bot
 export const getBotData = async (req, res) => {
     try {
         const { id } = req.params;
@@ -79,6 +86,25 @@ export const getBotData = async (req, res) => {
         }
 
         return res.status(200).json(bot);
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+// Get info about commands for selected bot
+export const getCommandsData = async (req, res) => {
+    try {
+        const botId = req.params.id;
+
+        const commandsData = await commandStatus.find({ botId });
+
+        if (commandsData) {
+            return res.status(200).json({ commandsData });
+        }
+
+        return res
+            .status(404)
+            .json({ error: 'No commands data found for the botId.' });
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' });
     }

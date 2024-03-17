@@ -6,15 +6,27 @@ import './AreaCards.scss';
 const AreaCards = () => {
 	const [botName, setBotName] = useState('');
 	const [botToken, setBotToken] = useState('');
+	const [isFilterEnabled, setIsFilterEnabled] = useState();
 
-	useEffect(() => {
-		fetchBotData();
-	}, []);
+	const toggleFilter = () => {
+		setIsFilterEnabled(!isFilterEnabled);
+		axios
+			.post('http://localhost:8080/api/command/messageFilter', {
+				isFilterEnabled,
+			})
+			.then((response) => {
+				console.log(response.data);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	};
 
 	useEffect(() => {
 		const botId = Cookies.get('botId');
 		if (botId) {
 			fetchBotData(botId);
+			fetchCommandData(botId);
 		}
 	}, []);
 
@@ -28,6 +40,17 @@ const AreaCards = () => {
 			})
 			.catch((error) => {
 				console.error('Error fetching bot details:', error);
+			});
+	};
+	const fetchCommandData = async (botId) => {
+		axios
+			.get(`http://localhost:8080/api/getCommandsData/${botId}`)
+			.then((response) => {
+				const { isMessageFilterEnabled } = response.data.commandsData[0];
+				setIsFilterEnabled(isMessageFilterEnabled);
+			})
+			.catch((error) => {
+				console.error('Error fetching command details:', error);
 			});
 	};
 
@@ -68,6 +91,17 @@ const AreaCards = () => {
 						</div>
 					</div>
 				)}
+			</div>
+			<div className="card">
+				<div className="command-card">
+					<h2>{isFilterEnabled ? 'Disable Filter' : 'Enable Filter'}</h2>
+					<button className="btn-submit" onClick={toggleFilter}>
+						{isFilterEnabled ? 'Turn Off' : 'Turn On'}
+					</button>
+				</div>
+				<div className="submit-card">
+					<button className="btn-submit">Save Configuration</button>
+				</div>
 			</div>
 		</section>
 	);
