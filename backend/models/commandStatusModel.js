@@ -11,6 +11,11 @@ const commandStatusSchema = new mongoose.Schema({
         required: true,
         default: false,
     },
+    isKickUserEnabled: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
 });
 
 const commandStatus = mongoose.model('commandStatus', commandStatusSchema);

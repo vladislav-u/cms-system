@@ -7,12 +7,27 @@ const AreaCards = () => {
 	const [botName, setBotName] = useState('');
 	const [botToken, setBotToken] = useState('');
 	const [isFilterEnabled, setIsFilterEnabled] = useState();
+	const [isKickUserEnabled, setIsKickUserEnabled] = useState();
 
 	const toggleFilter = async () => {
 		setIsFilterEnabled(!isFilterEnabled);
 		axios
 			.post('http://localhost:8080/api/command/messageFilter', {
 				isFilterEnabled: !isFilterEnabled,
+			})
+			.then((response) => {
+				console.log(response.data);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	};
+
+	const toggleKick = async () => {
+		setIsKickUserEnabled(!isKickUserEnabled);
+		axios
+			.post('http://localhost:8080/api/command/kickUser', {
+				isKickUserEnabled: !isKickUserEnabled,
 			})
 			.then((response) => {
 				console.log(response.data);
@@ -46,8 +61,10 @@ const AreaCards = () => {
 		axios
 			.get(`http://localhost:8080/api/getCommandsData/${botId}`)
 			.then((response) => {
-				const { isMessageFilterEnabled } = response.data.commandsData[0];
+				const { isMessageFilterEnabled, isKickUserEnabled } =
+					response.data.commandsData[0];
 				setIsFilterEnabled(isMessageFilterEnabled);
+				setIsKickUserEnabled(isKickUserEnabled);
 			})
 			.catch((error) => {
 				console.error('Error fetching command details:', error);
@@ -58,6 +75,11 @@ const AreaCards = () => {
 		axios
 			.post('http://localhost:8080/api/command/launchBot', { botToken })
 			.then((response) => {
+				const botId = Cookies.get('botId');
+				if (botId) {
+					fetchCommandData(botId);
+				}
+
 				console.log(response.data);
 			})
 			.catch((error) => {
@@ -97,6 +119,12 @@ const AreaCards = () => {
 					<h2>{isFilterEnabled ? 'Disable Filter' : 'Enable Filter'}</h2>
 					<button className="btn-submit" onClick={toggleFilter}>
 						{isFilterEnabled ? 'Turn Off' : 'Turn On'}
+					</button>
+				</div>
+				<div className="command-card">
+					<h2>{isKickUserEnabled ? 'Disable Kick' : 'Enable Kick'}</h2>
+					<button className="btn-submit" onClick={toggleKick}>
+						{isKickUserEnabled ? 'Turn Off' : 'Turn On'}
 					</button>
 				</div>
 				<div className="submit-card">

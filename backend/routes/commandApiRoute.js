@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+    kickUser,
     launchBot,
     messageFilter,
     stopBot,
@@ -10,5 +11,6 @@ const commandApiRoute = express.Router();
 commandApiRoute.post('/launchBot', launchBot);
 commandApiRoute.post('/stopBot', stopBot);
 commandApiRoute.post('/messageFilter', messageFilter);
+commandApiRoute.post('/kickUser', kickUser);
 
 export default commandApiRoute;

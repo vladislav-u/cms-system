@@ -81,3 +81,57 @@ export const messageFilter = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 };
+
+export const kickUser = async (req, res) => {
+    try {
+        const { isKickUserEnabled } = req.body;
+        const { botId } = req.cookies;
+
+        // Update State of a command in database
+        await commandStatus.findOneAndUpdate({ botId }, { isKickUserEnabled });
+        bot.command('kick', async (ctx) => {
+            // Check if the command has a mentioned user
+            if (
+                !ctx.message.reply_to_message ||
+                !ctx.message.reply_to_message.from
+            ) {
+                ctx.reply(
+                    'Please reply to a message from the user you want to kick.',
+                );
+            } else {
+                // Check if the user issuing the command is an administrator
+                const isAdmin = await ctx.telegram
+                    .getChatMember(ctx.chat.id, ctx.from.id)
+                    .then((member) => member.status === 'administrator')
+                    .catch((error) => {
+                        console.error('Error checking admin status:', error);
+                        return false;
+                    });
+
+                if (!isAdmin) {
+                    ctx.reply(
+                        'You must be an administrator to use this command.',
+                    );
+                } else {
+                    // Extract the user ID from the replied message
+                    const userId = ctx.message.reply_to_message.from.id;
+
+                    try {
+                        // Kick the user from the chat
+                        await ctx.telegram.kickChatMember(ctx.chat.id, userId);
+                        ctx.reply(
+                            `User ${userId} has been kicked from the chat.`,
+                        );
+                    } catch (error) {
+                        ctx.reply('Failed to kick the user.');
+                    }
+                }
+            }
+        });
+        return res
+            .status(200)
+            .json({ message: `Kick is ${isKickUserEnabled ? 'on' : 'off'}.` });
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
