@@ -16,6 +16,11 @@ const commandStatusSchema = new mongoose.Schema({
         required: true,
         default: false,
     },
+    isMuteUserEnabled: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
 });
 
 const commandStatus = mongoose.model('commandStatus', commandStatusSchema);

@@ -8,6 +8,7 @@ const AreaCards = () => {
 	const [botToken, setBotToken] = useState('');
 	const [isFilterEnabled, setIsFilterEnabled] = useState();
 	const [isKickUserEnabled, setIsKickUserEnabled] = useState();
+	const [isMuteUserEnabled, setIsMuteUserEnabled] = useState();
 
 	const toggleFilter = async () => {
 		setIsFilterEnabled(!isFilterEnabled);
@@ -28,6 +29,20 @@ const AreaCards = () => {
 		axios
 			.post('http://localhost:8080/api/command/kickUser', {
 				isKickUserEnabled: !isKickUserEnabled,
+			})
+			.then((response) => {
+				console.log(response.data);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	};
+
+	const toggleMute = async () => {
+		setIsMuteUserEnabled(!isMuteUserEnabled);
+		axios
+			.post('http://localhost:8080/api/command/muteUser', {
+				isMuteUserEnabled: !isMuteUserEnabled,
 			})
 			.then((response) => {
 				console.log(response.data);
@@ -61,10 +76,11 @@ const AreaCards = () => {
 		axios
 			.get(`http://localhost:8080/api/getCommandsData/${botId}`)
 			.then((response) => {
-				const { isMessageFilterEnabled, isKickUserEnabled } =
+				const { isMessageFilterEnabled, isKickUserEnabled, isMuteUserEnabled } =
 					response.data.commandsData[0];
 				setIsFilterEnabled(isMessageFilterEnabled);
 				setIsKickUserEnabled(isKickUserEnabled);
+				setIsMuteUserEnabled(isMuteUserEnabled);
 			})
 			.catch((error) => {
 				console.error('Error fetching command details:', error);
@@ -125,6 +141,12 @@ const AreaCards = () => {
 					<h2>{isKickUserEnabled ? 'Disable Kick' : 'Enable Kick'}</h2>
 					<button className="btn-submit" onClick={toggleKick}>
 						{isKickUserEnabled ? 'Turn Off' : 'Turn On'}
+					</button>
+				</div>
+				<div className="command-card">
+					<h2>{isMuteUserEnabled ? 'Disable Mute' : 'Enable Mute'}</h2>
+					<button className="btn-submit" onClick={toggleMute}>
+						{isMuteUserEnabled ? 'Turn Off' : 'Turn On'}
 					</button>
 				</div>
 				<div className="submit-card">

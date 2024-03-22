@@ -61,7 +61,7 @@ export const messageFilter = async (req, res) => {
                     const fullName =
                         `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim();
                     bot.telegram.restrictChatMember(ctx.chat.id, userId, {
-                        until_date: Math.floor(Date.now() / 1000) + 10, // Mute for 10 seconds
+                        until_date: Math.floor(Date.now() / 1000) + 300, // Mute for 5 mins seconds
                         can_send_messages: false,
                     });
                     bot.telegram.sendMessage(
@@ -89,6 +89,7 @@ export const kickUser = async (req, res) => {
 
         // Update State of a command in database
         await commandStatus.findOneAndUpdate({ botId }, { isKickUserEnabled });
+
         bot.command('kick', async (ctx) => {
             // Check if the command has a mentioned user
             if (
@@ -128,9 +129,74 @@ export const kickUser = async (req, res) => {
                 }
             }
         });
-        return res
-            .status(200)
-            .json({ message: `Kick is ${isKickUserEnabled ? 'on' : 'off'}.` });
+        return res.status(200).json({
+            message: `Kick Command is ${isKickUserEnabled ? 'on' : 'off'}.`,
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+export const muteUser = async (req, res) => {
+    try {
+        const { isMuteUserEnabled } = req.body;
+        const { botId } = req.cookies;
+
+        // Update State of a command in database
+        await commandStatus.findOneAndUpdate({ botId }, { isMuteUserEnabled });
+
+        bot.command('mute', async (ctx) => {
+            // Check if the command has a mentioned user
+            if (
+                !ctx.message.reply_to_message ||
+                !ctx.message.reply_to_message.from
+            ) {
+                return ctx.reply(
+                    'Please reply to a message from the user you want to mute.',
+                );
+            }
+
+            // Extract user ID from the replied message
+            const userId = ctx.message.reply_to_message.from.id;
+
+            // Check if the command has the correct format
+            const args = ctx.message.text.split(' ');
+            if (args.length !== 2) {
+                return ctx.reply('Usage: /mute AMOUNT_OF_TIME');
+            }
+
+            // Extract duration from command arguments
+            const durationInSeconds = parseInt(args[1], 10);
+
+            // Validate user ID and duration
+            if (Number.isNaN(durationInSeconds) || durationInSeconds <= 0) {
+                return ctx.reply('Invalid duration.');
+            }
+
+            try {
+                // Mute the user
+                bot.telegram.restrictChatMember(ctx.chat.id, userId, {
+                    until_date:
+                        Math.floor(Date.now() / 1000) + durationInSeconds, // Mute for set time
+                    can_send_messages: false,
+                    can_send_media_messages: false,
+                    can_send_other_messages: false,
+                    can_add_web_page_previews: false,
+                });
+                return ctx.reply(
+                    `User ${userId} muted for ${durationInSeconds} seconds.`,
+                );
+            } catch (error) {
+                console.error('Error muting user:', error);
+                return ctx.reply(
+                    'Failed to mute user. Please try again later.',
+                );
+            }
+        });
+
+        return res.status(200).json({
+            message: `Mute Command is ${isMuteUserEnabled ? 'on' : 'off'}.`,
+        });
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' });
     }
