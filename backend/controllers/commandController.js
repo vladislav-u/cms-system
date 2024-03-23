@@ -49,9 +49,12 @@ export const messageFilter = async (req, res) => {
             { isMessageFilterEnabled: isFilterEnabled },
         );
 
-        bot.use((ctx, next) => {
+        bot.use(async (ctx, next) => {
+            const commandData = await commandStatus.findOne({ botId });
+            const filterStatus = commandData.isMessageFilterEnabled;
+
             if (
-                isFilterEnabled &&
+                filterStatus &&
                 ctx.updateType === 'message' &&
                 ctx.message.text
             ) {
@@ -91,44 +94,50 @@ export const kickUser = async (req, res) => {
         await commandStatus.findOneAndUpdate({ botId }, { isKickUserEnabled });
 
         bot.command('kick', async (ctx) => {
+            const commandData = await commandStatus.findOne({ botId });
+            const kickStatus = commandData.isKickUserEnabled;
+            // If command is off
+            if (!kickStatus) {
+                return ctx.reply('The kick feature is currently turned off.');
+            }
+
             // Check if the command has a mentioned user
             if (
                 !ctx.message.reply_to_message ||
                 !ctx.message.reply_to_message.from
             ) {
-                ctx.reply(
+                return ctx.reply(
                     'Please reply to a message from the user you want to kick.',
                 );
-            } else {
-                // Check if the user issuing the command is an administrator
-                const isAdmin = await ctx.telegram
-                    .getChatMember(ctx.chat.id, ctx.from.id)
-                    .then((member) => member.status === 'administrator')
-                    .catch((error) => {
-                        console.error('Error checking admin status:', error);
-                        return false;
-                    });
+            }
+            // Check if the user issuing the command is an administrator
+            const isAdmin = await ctx.telegram
+                .getChatMember(ctx.chat.id, ctx.from.id)
+                .then((member) => member.status === 'administrator')
+                .catch((error) => {
+                    console.error('Error checking admin status:', error);
+                    return false;
+                });
 
-                if (!isAdmin) {
-                    ctx.reply(
-                        'You must be an administrator to use this command.',
-                    );
-                } else {
-                    // Extract the user ID from the replied message
-                    const userId = ctx.message.reply_to_message.from.id;
+            if (!isAdmin) {
+                return ctx.reply(
+                    'You must be an administrator to use this command.',
+                );
+            }
+            // Extract the user ID from the replied message
+            const userId = ctx.message.reply_to_message.from.id;
 
-                    try {
-                        // Kick the user from the chat
-                        await ctx.telegram.kickChatMember(ctx.chat.id, userId);
-                        ctx.reply(
-                            `User ${userId} has been kicked from the chat.`,
-                        );
-                    } catch (error) {
-                        ctx.reply('Failed to kick the user.');
-                    }
-                }
+            try {
+                // Kick the user from the chat
+                await ctx.telegram.kickChatMember(ctx.chat.id, userId);
+                return ctx.reply(
+                    `User ${userId} has been kicked from the chat.`,
+                );
+            } catch (error) {
+                return ctx.reply('Failed to kick the user.');
             }
         });
+
         return res.status(200).json({
             message: `Kick Command is ${isKickUserEnabled ? 'on' : 'off'}.`,
         });
@@ -146,6 +155,14 @@ export const muteUser = async (req, res) => {
         await commandStatus.findOneAndUpdate({ botId }, { isMuteUserEnabled });
 
         bot.command('mute', async (ctx) => {
+            const commandData = await commandStatus.findOne({ botId });
+            const muteStatus = commandData.isMuteUserEnabled;
+
+            // If command is off
+            if (!muteStatus) {
+                return ctx.reply('The mute feature is currently turned off.');
+            }
+
             // Check if the command has a mentioned user
             if (
                 !ctx.message.reply_to_message ||

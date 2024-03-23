@@ -39,7 +39,7 @@ const Sidebar = () => {
 		return () => {
 			document.removeEventListener('mousedown', handleClickOutside);
 		};
-	}, []);
+	});
 
 	const handleLogOut = async () => {
 		document.cookie = 'token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
@@ -67,7 +67,7 @@ const Sidebar = () => {
 			<div className="sidebar-top">
 				<div className="sidebar-brand">
 					<img src={theme === LIGHT_THEME ? LogoBlue : LogoWhite} alt="Logo" />
-					<span className="sidebar-brand-text">tabernam.</span>
+					<span className="sidebar-brand-text">CMS System</span>
 				</div>
 				<button className="sidebar-close-btn" onClick={closeSidebar}>
 					<MdOutlineClose size={24} />
