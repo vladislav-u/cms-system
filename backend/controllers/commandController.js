@@ -173,6 +173,21 @@ export const muteUser = async (req, res) => {
                 );
             }
 
+            // Check if the user issuing the command is an administrator
+            const isAdmin = await ctx.telegram
+                .getChatMember(ctx.chat.id, ctx.from.id)
+                .then((member) => member.status === 'administrator')
+                .catch((error) => {
+                    console.error('Error checking admin status:', error);
+                    return false;
+                });
+
+            if (!isAdmin) {
+                return ctx.reply(
+                    'You must be an administrator to use this command.',
+                );
+            }
+
             // Extract user ID from the replied message
             const userId = ctx.message.reply_to_message.from.id;
 

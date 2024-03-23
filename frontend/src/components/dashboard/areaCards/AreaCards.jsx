@@ -149,9 +149,6 @@ const AreaCards = () => {
 						{isMuteUserEnabled ? 'Turn Off' : 'Turn On'}
 					</button>
 				</div>
-				<div className="submit-card">
-					<button className="btn-submit">Save Configuration</button>
-				</div>
 			</div>
 		</section>
 	);
