@@ -144,7 +144,9 @@ const AreaCards = () => {
 					</button>
 				</div>
 				<div className="command-card">
-					<h2>{isMuteUserEnabled ? 'Disable Mute' : 'Enable Mute'}</h2>
+					<h2>
+						{isMuteUserEnabled ? 'Disable Mute/Unmute' : 'Enable Mute/Unmute'}
+					</h2>
 					<button className="btn-submit" onClick={toggleMute}>
 						{isMuteUserEnabled ? 'Turn Off' : 'Turn On'}
 					</button>

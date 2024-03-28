@@ -176,7 +176,11 @@ export const muteUser = async (req, res) => {
             // Check if the user issuing the command is an administrator
             const isAdmin = await ctx.telegram
                 .getChatMember(ctx.chat.id, ctx.from.id)
-                .then((member) => member.status === 'administrator')
+                .then(
+                    (member) =>
+                        member.status === 'administrator' ||
+                        member.status === 'creator',
+                )
                 .catch((error) => {
                     console.error('Error checking admin status:', error);
                     return false;
@@ -222,6 +226,66 @@ export const muteUser = async (req, res) => {
                 console.error('Error muting user:', error);
                 return ctx.reply(
                     'Failed to mute user. Please try again later.',
+                );
+            }
+        });
+
+        // Command to unmute a user
+        bot.command('unmute', async (ctx) => {
+            const commandData = await commandStatus.findOne({ botId });
+            const muteStatus = commandData.isMuteUserEnabled;
+
+            // If command is off
+            if (!muteStatus) {
+                return ctx.reply('The mute feature is currently turned off.');
+            }
+
+            // Check if the user issuing the command is an administrator
+            const isAdmin = await ctx.telegram
+                .getChatMember(ctx.chat.id, ctx.from.id)
+                .then(
+                    (member) =>
+                        member.status === 'administrator' ||
+                        member.status === 'creator',
+                )
+                .catch((error) => {
+                    console.error('Error checking admin status:', error);
+                    return false;
+                });
+
+            if (!isAdmin) {
+                return ctx.reply(
+                    'You must be an administrator to use this command.',
+                );
+            }
+
+            // Check if the command has a mentioned user
+            if (
+                !ctx.message.reply_to_message ||
+                !ctx.message.reply_to_message.from
+            ) {
+                return ctx.reply(
+                    'Please reply to a message from the user you want to unmute.',
+                );
+            }
+
+            // Extract user ID from the replied message
+            const userId = ctx.message.reply_to_message.from.id;
+
+            try {
+                // Unmute the user
+                bot.telegram.restrictChatMember(ctx.chat.id, userId, {
+                    until_date: 0, // Unmute the user
+                    can_send_messages: true,
+                    can_send_media_messages: true,
+                    can_send_other_messages: true,
+                    can_add_web_page_previews: true,
+                });
+                return ctx.reply(`User ${userId} unmuted.`);
+            } catch (error) {
+                console.error('Error unmuting user:', error);
+                return ctx.reply(
+                    'Failed to unmute user. Please try again later.',
                 );
             }
         });
