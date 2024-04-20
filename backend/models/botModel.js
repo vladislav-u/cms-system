@@ -14,6 +14,11 @@ const botSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    botStatus: {
+        type: Boolean,
+        required: true,
+        default: false,
+    },
 });
 
 const Bot = mongoose.model('Bot', botSchema);

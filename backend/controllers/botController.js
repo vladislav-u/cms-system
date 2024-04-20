@@ -27,6 +27,7 @@ export const submitToken = async (req, res) => {
         // Make commandStatus Model for this bot
         const bot = await Bot.findOne({ botToken });
         const newCommandStatus = {
+            // eslint-disable-next-line no-underscore-dangle
             botId: bot._id,
         };
         await commandStatus.create(newCommandStatus);

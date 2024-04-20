@@ -6,6 +6,7 @@ import './AreaCards.scss';
 const AreaCards = () => {
 	const [botName, setBotName] = useState('');
 	const [botToken, setBotToken] = useState('');
+	const [botStatus, setBotStatus] = useState();
 	const [isFilterEnabled, setIsFilterEnabled] = useState();
 	const [isKickUserEnabled, setIsKickUserEnabled] = useState();
 	const [isMuteUserEnabled, setIsMuteUserEnabled] = useState();
@@ -64,7 +65,8 @@ const AreaCards = () => {
 		axios
 			.get(`http://localhost:8080/api/getBotData/${botId}`)
 			.then((response) => {
-				const { botName, botToken } = response.data;
+				const { botName, botToken, botStatus } = response.data;
+				setBotStatus(botStatus);
 				setBotName(botName);
 				setBotToken(botToken);
 			})
@@ -88,6 +90,7 @@ const AreaCards = () => {
 	};
 
 	const launchBot = async () => {
+		setBotStatus(!botStatus);
 		axios
 			.post('http://localhost:8080/api/command/launchBot', { botToken })
 			.then((response) => {
@@ -103,6 +106,7 @@ const AreaCards = () => {
 			});
 	};
 	const stopBot = async () => {
+		setBotStatus(!botStatus);
 		axios
 			.post('http://localhost:8080/api/command/stopBot')
 			.then((response) => {
@@ -118,7 +122,12 @@ const AreaCards = () => {
 			<div className="card">
 				{botName && (
 					<div className="bot-card">
-						<h2>Launch this bot: {botName}</h2>
+						<h2>
+							Launch this bot: <b>{botName}</b>
+						</h2>
+						<h2>
+							Status: <b>{botStatus ? 'Running' : 'Stopped'}</b>
+						</h2>
 						<div className="btn-wrap">
 							<button className="btn-submit" onClick={launchBot}>
 								Launch Bot

@@ -1,20 +1,25 @@
 import { Telegraf } from 'telegraf';
+import bot from '../models/botModel.js';
 import commandStatus from '../models/commandStatusModel.js';
 
-let bot = null;
+const bots = {};
 
 export const launchBot = async (req, res) => {
     try {
+        const { botId } = req.cookies;
+
         // If bot is launched, stop it
-        if (bot) {
-            bot.stop();
+        if (bots[botId]) {
+            bots[botId].stop();
         }
 
         // Launch bot
         const { botToken } = req.body;
-        bot = new Telegraf(botToken);
-        bot.start((ctx) => ctx.reply('Welcome'));
-        bot.launch();
+        bots[botId] = new Telegraf(botToken);
+        bots[botId].start((ctx) => ctx.reply('Welcome'));
+        bots[botId].launch();
+
+        await bot.findByIdAndUpdate(botId, { botStatus: true });
 
         return res.status(200).json({ message: 'Bot Launched.' });
     } catch (error) {
@@ -24,10 +29,14 @@ export const launchBot = async (req, res) => {
 
 export const stopBot = async (req, res) => {
     try {
+        const { botId } = req.cookies;
+
         // If bot is launched, stop it
-        if (bot) {
-            bot.stop();
+        if (bots[botId]) {
+            bots[botId].stop();
         }
+
+        await bot.findByIdAndUpdate(botId, { botStatus: false });
 
         return res.status(200).json({ message: 'Bot Stopped.' });
     } catch (error) {
@@ -49,7 +58,7 @@ export const messageFilter = async (req, res) => {
             { isMessageFilterEnabled: isFilterEnabled },
         );
 
-        bot.use(async (ctx, next) => {
+        bots[botId].use(async (ctx, next) => {
             const commandData = await commandStatus.findOne({ botId });
             const filterStatus = commandData.isMessageFilterEnabled;
 
@@ -63,11 +72,15 @@ export const messageFilter = async (req, res) => {
                     const userId = ctx.from.id;
                     const fullName =
                         `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim();
-                    bot.telegram.restrictChatMember(ctx.chat.id, userId, {
-                        until_date: Math.floor(Date.now() / 1000) + 300, // Mute for 5 mins seconds
-                        can_send_messages: false,
-                    });
-                    bot.telegram.sendMessage(
+                    bots[botId].telegram.restrictChatMember(
+                        ctx.chat.id,
+                        userId,
+                        {
+                            until_date: Math.floor(Date.now() / 1000) + 300, // Mute for 5 mins seconds
+                            can_send_messages: false,
+                        },
+                    );
+                    bots[botId].telegram.sendMessage(
                         ctx.chat.id,
                         `${fullName}, you have been muted for using inappropriate language.`,
                     );
@@ -93,7 +106,7 @@ export const kickUser = async (req, res) => {
         // Update State of a command in database
         await commandStatus.findOneAndUpdate({ botId }, { isKickUserEnabled });
 
-        bot.command('kick', async (ctx) => {
+        bots[botId].command('kick', async (ctx) => {
             const commandData = await commandStatus.findOne({ botId });
             const kickStatus = commandData.isKickUserEnabled;
             // If command is off
@@ -154,7 +167,7 @@ export const muteUser = async (req, res) => {
         // Update State of a command in database
         await commandStatus.findOneAndUpdate({ botId }, { isMuteUserEnabled });
 
-        bot.command('mute', async (ctx) => {
+        bots[botId].command('mute', async (ctx) => {
             const commandData = await commandStatus.findOne({ botId });
             const muteStatus = commandData.isMuteUserEnabled;
 
@@ -211,7 +224,7 @@ export const muteUser = async (req, res) => {
 
             try {
                 // Mute the user
-                bot.telegram.restrictChatMember(ctx.chat.id, userId, {
+                bots[botId].telegram.restrictChatMember(ctx.chat.id, userId, {
                     until_date:
                         Math.floor(Date.now() / 1000) + durationInSeconds, // Mute for set time
                     can_send_messages: false,
@@ -231,7 +244,7 @@ export const muteUser = async (req, res) => {
         });
 
         // Command to unmute a user
-        bot.command('unmute', async (ctx) => {
+        bots[botId].command('unmute', async (ctx) => {
             const commandData = await commandStatus.findOne({ botId });
             const muteStatus = commandData.isMuteUserEnabled;
 
@@ -274,7 +287,7 @@ export const muteUser = async (req, res) => {
 
             try {
                 // Unmute the user
-                bot.telegram.restrictChatMember(ctx.chat.id, userId, {
+                bots[botId].telegram.restrictChatMember(ctx.chat.id, userId, {
                     until_date: 0, // Unmute the user
                     can_send_messages: true,
                     can_send_media_messages: true,
