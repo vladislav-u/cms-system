@@ -1,5 +1,5 @@
 import { Telegraf } from 'telegraf';
-import bot from '../models/botModel.js';
+import Bot from '../models/botModel.js';
 import commandStatus from '../models/commandStatusModel.js';
 
 const bots = {};
@@ -19,7 +19,7 @@ export const launchBot = async (req, res) => {
         bots[botId].start((ctx) => ctx.reply('Welcome'));
         bots[botId].launch();
 
-        await bot.findByIdAndUpdate(botId, { botStatus: true });
+        await Bot.findByIdAndUpdate(botId, { botStatus: true });
 
         return res.status(200).json({ message: 'Bot Launched.' });
     } catch (error) {
@@ -36,7 +36,7 @@ export const stopBot = async (req, res) => {
             bots[botId].stop();
         }
 
-        await bot.findByIdAndUpdate(botId, { botStatus: false });
+        await Bot.findByIdAndUpdate(botId, { botStatus: false });
 
         return res.status(200).json({ message: 'Bot Stopped.' });
     } catch (error) {
@@ -305,6 +305,48 @@ export const muteUser = async (req, res) => {
 
         return res.status(200).json({
             message: `Mute Command is ${isMuteUserEnabled ? 'on' : 'off'}.`,
+        });
+    } catch (error) {
+        return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+export const notifyAll = async (req, res) => {
+    try {
+        const { isNotifyAllEnabled } = req.body;
+        const { botId } = req.cookies;
+
+        // Update State of a command in database
+        await commandStatus.findOneAndUpdate({ botId }, { isNotifyAllEnabled });
+
+        bots[botId].command('broadcast', async (ctx) => {
+            const message = ctx.message.text.split(' ').slice(1).join(' '); // Extract message from command
+            if (!message) {
+                return ctx.reply('Please provide a message to broadcast.');
+            }
+
+            const chats = await bots[botId].telegram.getDialogs();
+            console.log(chats);
+
+            // eslint-disable-next-line no-restricted-syntax
+            for (const chat of chats) {
+                try {
+                    // Send message to each chat where the bot is a member
+                    // eslint-disable-next-line no-await-in-loop
+                    await bots[botId].telegram.sendMessage(chat.id, message);
+                } catch (error) {
+                    console.error(
+                        `Error sending message to chat ${chat.id}:`,
+                        error.message,
+                    );
+                }
+            }
+
+            return ctx.reply('Message broadcasted to all chats.');
+        });
+
+        return res.status(200).json({
+            message: `Notify All Command is ${isNotifyAllEnabled ? 'on' : 'off'}.`,
         });
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' });

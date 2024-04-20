@@ -10,6 +10,7 @@ const AreaCards = () => {
 	const [isFilterEnabled, setIsFilterEnabled] = useState();
 	const [isKickUserEnabled, setIsKickUserEnabled] = useState();
 	const [isMuteUserEnabled, setIsMuteUserEnabled] = useState();
+	const [isNotifyAllEnabled, setIsNotifyAllEnabled] = useState();
 
 	const toggleFilter = async () => {
 		setIsFilterEnabled(!isFilterEnabled);
@@ -53,6 +54,20 @@ const AreaCards = () => {
 			});
 	};
 
+	const toggleNotify = async () => {
+		setIsNotifyAllEnabled(!isNotifyAllEnabled);
+		axios
+			.post('http://localhost:8080/api/command/notifyAll', {
+				isNotifyAllEnabled: !isNotifyAllEnabled,
+			})
+			.then((response) => {
+				console.log(response.data);
+			})
+			.catch((error) => {
+				console.error('Error:', error);
+			});
+	};
+
 	useEffect(() => {
 		const botId = Cookies.get('botId');
 		if (botId) {
@@ -78,11 +93,16 @@ const AreaCards = () => {
 		axios
 			.get(`http://localhost:8080/api/getCommandsData/${botId}`)
 			.then((response) => {
-				const { isMessageFilterEnabled, isKickUserEnabled, isMuteUserEnabled } =
-					response.data.commandsData[0];
+				const {
+					isMessageFilterEnabled,
+					isKickUserEnabled,
+					isMuteUserEnabled,
+					isNotifyAllEnabled,
+				} = response.data.commandsData[0];
 				setIsFilterEnabled(isMessageFilterEnabled);
 				setIsKickUserEnabled(isKickUserEnabled);
 				setIsMuteUserEnabled(isMuteUserEnabled);
+				setIsNotifyAllEnabled(isNotifyAllEnabled);
 			})
 			.catch((error) => {
 				console.error('Error fetching command details:', error);
@@ -158,6 +178,14 @@ const AreaCards = () => {
 					</h2>
 					<button className="btn-submit" onClick={toggleMute}>
 						{isMuteUserEnabled ? 'Turn Off' : 'Turn On'}
+					</button>
+				</div>
+				<div className="command-card">
+					<h2>
+						{isNotifyAllEnabled ? 'Disable Notify All' : 'Enable Notify All'}
+					</h2>
+					<button className="btn-submit" onClick={toggleNotify}>
+						{isNotifyAllEnabled ? 'Turn Off' : 'Turn On'}
 					</button>
 				</div>
 			</div>
