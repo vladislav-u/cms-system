@@ -19,6 +19,19 @@ const botSchema = new mongoose.Schema({
         required: true,
         default: false,
     },
+    botChats: [
+        {
+            chatId: {
+                type: String,
+                required: true,
+            },
+            chatType: {
+                type: String,
+                enum: ['private', 'group', 'supergroup', 'channel'],
+                required: true,
+            },
+        },
+    ],
 });
 
 const Bot = mongoose.model('Bot', botSchema);

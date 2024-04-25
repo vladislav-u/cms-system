@@ -19,6 +19,48 @@ export const launchBot = async (req, res) => {
         bots[botId].start((ctx) => ctx.reply('Welcome'));
         bots[botId].launch();
 
+        // Gets all invites for bot, and adds chat Id if it is a new chat
+        bots[botId].on('new_chat_members', async (ctx) => {
+            const chatId = ctx.chat.id;
+            const chatType = ctx.chat.type;
+
+            try {
+                // Find the bot document by botId
+                const botDocument = await Bot.findById(botId);
+                // If the bot document does not exist, return
+                if (!botDocument) {
+                    console.log(`Bot with botId ${botId} not found.`);
+                    return;
+                }
+
+                const botChats = botDocument.botChats || [];
+
+                // Check if the chatId already exists in botChats
+                const chatExists = botChats.some(
+                    (chat) => chat.chatId === chatId,
+                );
+
+                if (!chatExists) {
+                    const newChat = {
+                        chatId,
+                        chatType,
+                    };
+
+                    botChats.push(newChat);
+
+                    await Bot.findByIdAndUpdate(botId, { botChats });
+
+                    console.log(`Chat ${chatId} added to bot ${botId}.`);
+                } else {
+                    console.log(
+                        `Chat ${chatId} already exists in bot ${botId}.`,
+                    );
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        });
+
         await Bot.findByIdAndUpdate(botId, { botStatus: true });
 
         return res.status(200).json({ message: 'Bot Launched.' });
@@ -320,20 +362,36 @@ export const notifyAll = async (req, res) => {
         await commandStatus.findOneAndUpdate({ botId }, { isNotifyAllEnabled });
 
         bots[botId].command('broadcast', async (ctx) => {
+            const commandData = await commandStatus.findOne({ botId });
+            const notifyAllStatus = commandData.isNotifyAllEnabled;
+
+            if (!notifyAllStatus) {
+                return ctx.reply(
+                    'The Notify All feature is currently turned off.',
+                );
+            }
+
             const message = ctx.message.text.split(' ').slice(1).join(' '); // Extract message from command
             if (!message) {
                 return ctx.reply('Please provide a message to broadcast.');
             }
 
-            const chats = await bots[botId].telegram.getDialogs();
-            console.log(chats);
+            // Find chats that bot is a member of
+            const botDocument = await Bot.findById(botId);
+            if (!botDocument) {
+                console.log(`Bot with botId ${botId} not found.`);
+            }
+            const botChats = botDocument.botChats || [];
 
             // eslint-disable-next-line no-restricted-syntax
-            for (const chat of chats) {
+            for (const chat of botChats) {
                 try {
                     // Send message to each chat where the bot is a member
                     // eslint-disable-next-line no-await-in-loop
-                    await bots[botId].telegram.sendMessage(chat.id, message);
+                    await bots[botId].telegram.sendMessage(
+                        chat.chatId,
+                        message,
+                    );
                 } catch (error) {
                     console.error(
                         `Error sending message to chat ${chat.id}:`,
