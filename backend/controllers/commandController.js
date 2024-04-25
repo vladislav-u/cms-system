@@ -24,40 +24,48 @@ export const launchBot = async (req, res) => {
             const chatId = ctx.chat.id;
             const chatType = ctx.chat.type;
 
-            try {
-                // Find the bot document by botId
-                const botDocument = await Bot.findById(botId);
-                // If the bot document does not exist, return
-                if (!botDocument) {
-                    console.log(`Bot with botId ${botId} not found.`);
-                    return;
-                }
+            const botUsername = ctx.botInfo.username;
+            const newMembers = ctx.message.new_chat_members;
+            const isBotNewMember = newMembers.some(
+                (member) => member.username === botUsername,
+            );
 
-                const botChats = botDocument.botChats || [];
+            if (isBotNewMember) {
+                try {
+                    // Find the bot document by botId
+                    const botDocument = await Bot.findById(botId);
+                    // If the bot document does not exist, return
+                    if (!botDocument) {
+                        console.log(`Bot with botId ${botId} not found.`);
+                        return;
+                    }
 
-                // Check if the chatId already exists in botChats
-                const chatExists = botChats.some(
-                    (chat) => chat.chatId === chatId,
-                );
+                    const botChats = botDocument.botChats || [];
 
-                if (!chatExists) {
-                    const newChat = {
-                        chatId,
-                        chatType,
-                    };
-
-                    botChats.push(newChat);
-
-                    await Bot.findByIdAndUpdate(botId, { botChats });
-
-                    console.log(`Chat ${chatId} added to bot ${botId}.`);
-                } else {
-                    console.log(
-                        `Chat ${chatId} already exists in bot ${botId}.`,
+                    // Check if the chatId already exists in botChats
+                    const chatExists = botChats.some(
+                        (chat) => chat.chatId === chatId,
                     );
+
+                    if (!chatExists) {
+                        const newChat = {
+                            chatId,
+                            chatType,
+                        };
+
+                        botChats.push(newChat);
+
+                        await Bot.findByIdAndUpdate(botId, { botChats });
+
+                        console.log(`Chat ${chatId} added to bot ${botId}.`);
+                    } else {
+                        console.log(
+                            `Chat ${chatId} already exists in bot ${botId}.`,
+                        );
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
                 }
-            } catch (error) {
-                console.error('Error:', error);
             }
         });
 
@@ -393,10 +401,21 @@ export const notifyAll = async (req, res) => {
                         message,
                     );
                 } catch (error) {
-                    console.error(
-                        `Error sending message to chat ${chat.id}:`,
-                        error.message,
-                    );
+                    // If 403 error, remove the chat from botChats array
+                    if (error.code === 403) {
+                        console.error(
+                            `Chat ${chat.chatId} denied access to bot ${botId}. Removing from botChats.`,
+                        );
+                        // eslint-disable-next-line no-await-in-loop
+                        await Bot.findByIdAndUpdate(botId, {
+                            $pull: { botChats: { chatId: chat.chatId } },
+                        });
+                    } else {
+                        console.error(
+                            `Error sending message to chat ${chat.chatId}:`,
+                            error.message,
+                        );
+                    }
                 }
             }
 
