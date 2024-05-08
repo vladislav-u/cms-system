@@ -6,7 +6,7 @@
 }
 
 h1 {
-    color: white;
+    color: var(--xl-text-color);
     font-size: 72px;
 }
 
@@ -18,8 +18,8 @@ h1 {
     padding: 13px 25px;
     border: none;
     border-radius: 50px;
-    background-color: #007bff;
-    color: white;
+    background-color: var(--xl-text-color);
+    color: var(--secondary-color);
     cursor: pointer;
     margin: 0 125px;
     font-size: 32px;
@@ -27,5 +27,5 @@ h1 {
 }
 
 .rounded-button:hover {
-    background-color: #0056b3;
+    background-color: var(--base-text-color);
 }
