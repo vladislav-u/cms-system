@@ -1,8 +1,79 @@
+import jwt from 'jsonwebtoken';
 import { Telegraf } from 'telegraf';
 import Bot from '../models/botModel.js';
 import commandStatus from '../models/commandStatusModel.js';
 
 const bots = {};
+
+const startBot = async (botId, botToken) => {
+    try {
+        // If bot is launched, stop it
+        if (bots[botId]) {
+            bots[botId].stop();
+        }
+
+        // Launch bot
+        bots[botId] = new Telegraf(botToken);
+        bots[botId].start((ctx) => ctx.reply('Welcome'));
+        bots[botId].launch();
+
+        // Gets all invites for bot, and adds chat Id if it is a new chat
+        bots[botId].on('new_chat_members', async (ctx) => {
+            const chatId = ctx.chat.id;
+            const chatType = ctx.chat.type;
+
+            const botUsername = ctx.botInfo.username;
+            const newMembers = ctx.message.new_chat_members;
+            const isBotNewMember = newMembers.some(
+                (member) => member.username === botUsername,
+            );
+
+            if (isBotNewMember) {
+                try {
+                    // Find the bot document by botId
+                    const botDocument = await Bot.findById(botId);
+                    // If the bot document does not exist, return
+                    if (!botDocument) {
+                        console.log(`Bot with botId ${botId} not found.`);
+                        return;
+                    }
+
+                    const botChats = botDocument.botChats || [];
+
+                    // Check if the chatId already exists in botChats
+                    const chatExists = botChats.some(
+                        (chat) => chat.chatId === chatId,
+                    );
+
+                    if (!chatExists) {
+                        const newChat = {
+                            chatId,
+                            chatType,
+                        };
+
+                        botChats.push(newChat);
+
+                        await Bot.findByIdAndUpdate(botId, { botChats });
+
+                        console.log(`Chat ${chatId} added to bot ${botId}.`);
+                    } else {
+                        console.log(
+                            `Chat ${chatId} already exists in bot ${botId}.`,
+                        );
+                    }
+                } catch (error) {
+                    console.error('Error:', error);
+                }
+            }
+        });
+
+        await Bot.findByIdAndUpdate(botId, { botStatus: true });
+
+        return { message: 'Bot Launched.' };
+    } catch (error) {
+        return { error: 'Internal server error.' };
+    }
+};
 
 export const launchBot = async (req, res) => {
     try {
@@ -74,6 +145,29 @@ export const launchBot = async (req, res) => {
         return res.status(200).json({ message: 'Bot Launched.' });
     } catch (error) {
         return res.status(500).json({ error: 'Internal server error.' });
+    }
+};
+
+export const initializeBots = async (token) => {
+    try {
+        const decodedToken = jwt.verify(token, process.env.TOKEN_KEY);
+
+        // Extract user_id from the decoded token
+        const ownerId = decodedToken.user_id;
+
+        // Find all bots owned by the user
+        const userBots = await Bot.find({ ownerId });
+
+        // eslint-disable-next-line no-restricted-syntax
+        for (const bot of userBots) {
+            if (bot.botStatus) {
+                console.log(await startBot(bot._id, bot.botToken));
+            }
+        }
+
+        return { message: 'Bots started successfully.' };
+    } catch (error) {
+        return { error: 'Internal server error.' };
     }
 };
 

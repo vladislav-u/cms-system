@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import User from '../models/userModel.js';
 import generateToken from '../services/authService.js';
+import { initializeBots } from './commandController.js';
 
 export const signIn = async (req, res) => {
     try {
@@ -14,6 +15,8 @@ export const signIn = async (req, res) => {
                 httpOnly: false,
                 maxAge: 24 * 60 * 60 * 1000,
             });
+
+            initializeBots(user.token);
 
             res.status(200).json({
                 message: 'Signed in successfully.',

@@ -1,5 +1,6 @@
 import express from 'express';
 import {
+    initializeBots,
     kickUser,
     launchBot,
     messageFilter,
@@ -16,5 +17,6 @@ commandApiRoute.post('/messageFilter', messageFilter);
 commandApiRoute.post('/kickUser', kickUser);
 commandApiRoute.post('/muteUser', muteUser);
 commandApiRoute.post('/notifyAll', notifyAll);
+commandApiRoute.post('/initializeBots', initializeBots);
 
 export default commandApiRoute;
