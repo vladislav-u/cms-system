@@ -4,9 +4,7 @@ import {
 	MdOutlineClose,
 	MdOutlineGridView,
 	MdOutlineLogout,
-	MdOutlineMessage,
 	MdOutlinePeople,
-	MdOutlineSettings,
 } from 'react-icons/md';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LIGHT_THEME } from '../../constants/themeConstants';
@@ -102,32 +100,11 @@ const Sidebar = () => {
 								<span className="menu-link-text">Manage Bots</span>
 							</Link>
 						</li>
-						<li className="menu-item">
-							<Link
-								to="/notifications"
-								className={`menu-link ${
-									location.pathname === '/notifications' ? 'active' : ''
-								}`}
-							>
-								<span className="menu-link-icon">
-									<MdOutlineMessage size={20} />
-								</span>
-								<span className="menu-link-text">Notifications</span>
-							</Link>
-						</li>
 					</ul>
 				</div>
 
 				<div className="sidebar-menu sidebar-menu2">
 					<ul className="menu-list">
-						<li className="menu-item">
-							<Link to="/" className="menu-link">
-								<span className="menu-link-icon">
-									<MdOutlineSettings size={20} />
-								</span>
-								<span className="menu-link-text">Settings</span>
-							</Link>
-						</li>
 						<li className="menu-item">
 							<Link to="/" className="menu-link">
 								<span className="menu-link-icon">
