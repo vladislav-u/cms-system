@@ -5,6 +5,9 @@ import commandStatus from '../models/commandStatusModel.js';
 
 const bots = {};
 
+const prohibitedWords = ['word1', 'word2', 'word3'];
+const prohibitedPattern = new RegExp(prohibitedWords.join('|'), 'i');
+
 const startBot = async (botId, botToken) => {
     try {
         // If bot is launched, stop it
@@ -187,9 +190,6 @@ export const stopBot = async (req, res) => {
         return res.status(500).json({ error: 'Internal server error.' });
     }
 };
-
-const prohibitedWords = ['word1', 'word2', 'word3'];
-const prohibitedPattern = new RegExp(prohibitedWords.join('|'), 'i');
 
 export const messageFilter = async (req, res) => {
     try {
