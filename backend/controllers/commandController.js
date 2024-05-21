@@ -115,7 +115,11 @@ const startBot = async (botId, botToken) => {
         // Check if the user issuing the command is an administrator
         const isAdmin = await ctx.telegram
             .getChatMember(ctx.chat.id, ctx.from.id)
-            .then((member) => member.status === 'administrator')
+            .then(
+                (member) =>
+                    member.status === 'administrator' ||
+                    member.status === 'creator',
+            )
             .catch((error) => {
                 console.error('Error checking admin status:', error);
                 return false;
@@ -134,6 +138,7 @@ const startBot = async (botId, botToken) => {
             await ctx.telegram.kickChatMember(ctx.chat.id, userId);
             return ctx.reply(`User ${userId} has been kicked from the chat.`);
         } catch (error) {
+            console.log(error);
             return ctx.reply('Failed to kick the user.');
         }
     });
