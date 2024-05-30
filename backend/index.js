@@ -27,8 +27,8 @@ connectToDatabase();
 app.use(express.json());
 
 app.use('/', userRoute);
-app.use('/api', botApiRoute);
-app.use('/api/command', commandApiRoute);
+app.use('/api', verifyToken, botApiRoute);
+app.use('/api/command', verifyToken, commandApiRoute);
 
 app.get('/api/verify-token', verifyToken, (req, res) => {
     res.status(200).json({
