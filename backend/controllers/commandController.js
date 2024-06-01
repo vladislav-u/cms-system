@@ -80,14 +80,25 @@ const startBot = async (botId, botToken) => {
                 const userId = ctx.from.id;
                 const fullName =
                     `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim();
-                bots[botId].telegram.restrictChatMember(ctx.chat.id, userId, {
-                    until_date: Math.floor(Date.now() / 1000) + 300, // Mute for 5 mins seconds
-                    can_send_messages: false,
-                });
-                bots[botId].telegram.sendMessage(
-                    ctx.chat.id,
-                    `${fullName}, you have been muted for using inappropriate language.`,
-                );
+                try {
+                    bots[botId].telegram.restrictChatMember(
+                        ctx.chat.id,
+                        userId,
+                        {
+                            until_date: Math.floor(Date.now() / 1000) + 300, // Mute for 5 mins seconds
+                            can_send_messages: false,
+                            can_send_media_messages: false,
+                            can_send_other_messages: false,
+                            can_add_web_page_previews: false,
+                        },
+                    );
+                    bots[botId].telegram.sendMessage(
+                        ctx.chat.id,
+                        `${fullName}, you have been muted for using inappropriate language.`,
+                    );
+                } catch (error) {
+                    bots[botId].telegram.sendMessage(`Cannot mute user.`);
+                }
             }
         }
 
