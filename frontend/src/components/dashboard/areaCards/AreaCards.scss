@@ -1,0 +1,79 @@
+.card{
+    font-family: var(--font-family-lato);
+    width: calc(100% - 30px);
+    margin: 15px;
+    padding: 10px;
+    box-shadow: rgba(100, 100, 111, 0.1) 0px 7px 29px 0px;
+    background-color: var(--secondary-color);
+    border-radius: 10px;
+    transition: var(--default-transition);
+
+    .input-field{
+        flex: 1; 
+        width: 100%; 
+        padding: 10px; 
+        background-color: var(--secondary-color); 
+        color: var(--text-color-inverted);
+        border: 3px solid var(--border-color-inverted); 
+        border-radius: 6px; 
+        box-sizing: border-box; 
+        font-size: 20px; 
+    }
+}
+
+h2{
+    color: var(--text-color-inverted);
+}
+
+.btn-wrap {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-submit{
+    flex-shrink: 0; 
+    padding: 10px 20px; 
+    background-color: var(--toggle-btn-icon-color);
+    color: var(--secondary-color); 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 20px; 
+}
+
+.btn-delete{
+    flex-shrink: 0; 
+    padding: 10px 20px; 
+    background-color: var(--red-color);
+    color: var(--light-color); 
+    border: none; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    font-size: 20px; 
+}
+
+.bot-card {
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; 
+    box-sizing: border-box;
+    color: var(--text-color-inverted);
+    border: 3px solid var(--border-color-inverted); 
+    border-radius: 6px; 
+}
+
+.command-card{
+    display: flex;
+    flex-direction: row; 
+    justify-content: space-between;
+    align-items: center;
+    width: 100%; 
+    padding: 20px;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+    color: var(--text-color-inverted);
+    border: 3px solid var(--border-color-inverted); 
+    border-radius: 6px; 
+}

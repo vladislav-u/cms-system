@@ -1,0 +1,31 @@
+.main-page-container {
+    text-align: center;
+    width: auto;
+    margin-top: 15%;
+    background-color: transparent;
+}
+
+h1 {
+    color: var(--xl-text-color);
+    font-size: 72px;
+}
+
+.buttons {
+    margin-top: 20px;
+}
+
+.rounded-button {
+    padding: 13px 25px;
+    border: none;
+    border-radius: 50px;
+    background-color: var(--xl-text-color);
+    color: var(--secondary-color);
+    cursor: pointer;
+    margin: 0 125px;
+    font-size: 32px;
+    font-weight: 700;
+}
+
+.rounded-button:hover {
+    background-color: var(--base-text-color);
+}
