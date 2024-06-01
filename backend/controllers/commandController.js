@@ -102,8 +102,8 @@ const startBot = async (botId, botToken) => {
 
         if (filterStatus && ctx.updateType === 'message' && ctx.message.text) {
             const message = ctx.message.text.toLowerCase();
-            if (!repliedUserIsAdmin) {
-                if (prohibitedPattern.test(message)) {
+            if (prohibitedPattern.test(message)) {
+                if (!repliedUserIsAdmin) {
                     const userId = ctx.from.id;
                     const fullName =
                         `${ctx.from.first_name || ''} ${ctx.from.last_name || ''}`.trim();
@@ -126,12 +126,12 @@ const startBot = async (botId, botToken) => {
                     } catch (error) {
                         bots[botId].telegram.sendMessage(`Cannot mute user.`);
                     }
+                } else {
+                    bots[botId].telegram.sendMessage(
+                        ctx.chat.id,
+                        'Cannot mute administrator or creator of group',
+                    );
                 }
-            } else {
-                bots[botId].telegram.sendMessage(
-                    ctx.chat.id,
-                    'Cannot mute administrator or creator of group',
-                );
             }
         }
 
@@ -192,6 +192,32 @@ const startBot = async (botId, botToken) => {
         const commandData = await commandStatus.findOne({ botId });
         const muteStatus = commandData.isMuteUserEnabled;
 
+        // Function to check if the replied-to user is an admin
+        const repliedUserIsAdmin = async () => {
+            if (!ctx.message || !ctx.message.reply_to_message) {
+                console.error(
+                    'This message is not a reply to another message.',
+                );
+                return false;
+            }
+
+            const repliedUserId = ctx.message.reply_to_message.from.id;
+
+            try {
+                const member = await ctx.telegram.getChatMember(
+                    ctx.chat.id,
+                    repliedUserId,
+                );
+                return (
+                    member.status === 'administrator' ||
+                    member.status === 'creator'
+                );
+            } catch (error) {
+                console.error('Error checking admin status:', error);
+                return false;
+            }
+        };
+
         // If command is off
         if (!muteStatus) {
             return ctx.reply('The mute feature is currently turned off.');
@@ -244,17 +270,21 @@ const startBot = async (botId, botToken) => {
         }
 
         try {
-            // Mute the user
-            bots[botId].telegram.restrictChatMember(ctx.chat.id, userId, {
-                until_date: Math.floor(Date.now() / 1000) + durationInSeconds, // Mute for set time
-                can_send_messages: false,
-                can_send_media_messages: false,
-                can_send_other_messages: false,
-                can_add_web_page_previews: false,
-            });
-            return ctx.reply(
-                `User ${userId} muted for ${durationInSeconds} seconds.`,
-            );
+            if (!repliedUserIsAdmin) {
+                // Mute the user
+                bots[botId].telegram.restrictChatMember(ctx.chat.id, userId, {
+                    until_date:
+                        Math.floor(Date.now() / 1000) + durationInSeconds, // Mute for set time
+                    can_send_messages: false,
+                    can_send_media_messages: false,
+                    can_send_other_messages: false,
+                    can_add_web_page_previews: false,
+                });
+                return ctx.reply(
+                    `User ${userId} muted for ${durationInSeconds} seconds.`,
+                );
+            }
+            return ctx.reply('Cannot mute administrator or creator of group');
         } catch (error) {
             console.error('Error muting user:', error);
             return ctx.reply('Failed to mute user. Please try again later.');
